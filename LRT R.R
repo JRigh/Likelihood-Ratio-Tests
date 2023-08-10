@@ -46,5 +46,37 @@ results = data.frame(mu0 = mu0,
 # 10  14    13.9065645      Yes
 # 11  15    34.0744886      Yes
 
-#----------------------------------
-# 1. Normal model, variance unknown
+#--------------------------------------------------------------------------
+# 2. Detection of the number of components in a univariate Gaussian Mixture
+
+library(mixtools) 
+
+set.seed(2023)
+data2 = rnormmix(n = 100, lambda = c(0.2, 0.3, 0.5), mu = c(1,5,8), sigma = c(1,1,1)) 
+
+## we will first run it 1,000 times and record each time the number of components selected by the lrt
+## hoping that one value for 'k' clearly stands out.
+set.seed(2)
+count.k = numeric(1000)
+for(i in 1:1000)  {
+  count.k[i]<- length(boot.comp(y=data2, max.comp=10, B=5,
+                                sig=0.05, mix.type=c("normalmix"))$p.values)
+}
+count.k
+
+sum(count.k==1)/1000  # percentage that LRT detect 3 components
+sum(count.k==2)/1000  # percentage that LRT detect 3 components
+sum(count.k==3)/1000  # percentage that LRT detect 3 components
+sum(count.k==4)/1000  # percentage that LRT detect 4 components
+sum(count.k==5)/1000  # percentage that LRT detect 5 components
+
+# visualize the results
+par(mfrow=c(1,1)) 
+barplot(table(count.k), col="grey", xlab="k", 
+        ylab="frequency", main="Number of mixture components selected with LRT")
+
+# from the barplot the LRT detect the presence of k=3 subpopulations in the mixture.
+
+#----
+# end
+#----
